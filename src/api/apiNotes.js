@@ -1,5 +1,5 @@
 import { db } from '../config/firebase'; 
-import { collection, getDocs, addDoc, deleteDoc, doc,serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc,serverTimestamp, updateDoc } from 'firebase/firestore';
 
 
 export async function getNotes() {
@@ -27,6 +27,15 @@ export async function addNewNote(noteData) {
     isPinned: false,
   };
   await addDoc(notesRef, dataWithDefaults); 
+}
+
+export async function updateNote(noteId, updatedData) {
+  const noteRef = doc(db, 'notes', noteId);
+   console.log(`reaching : ${noteId} and ${updateNote}`)
+  await updateDoc(noteRef, {
+    ...updatedData,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function deleteNote(noteId) {
