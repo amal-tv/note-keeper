@@ -1,121 +1,112 @@
 import React, { useState } from "react";
+import { useNotes } from "../context/NotesContext";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useFetch } from "@/hooks/useFetch";
-import { getNotes, updateNote } from "@/api/apiNotes";
+} from "./ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Button } from "../components/ui/button";
+import { Pin } from "lucide-react";
+import { PinOff } from 'lucide-react';
 
-export const NoteCard = ({ note, bgColor, onUpdate, onDelete }) => {
+export const NoteCard = ({ note,bgColor }) => {
+  const { editNote, removeNote, pinNote } = useNotes();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedNote, setEditedNote] = useState({
-    title: note.title || "",
-    tagline: note.tagline || "",
-    content: note.content || "",
-  });
+  const [editedNote, setEditedNote] = useState({ ...note });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-
-  const {fn : fnupdateNote,loading : loadingUpdate, error : errorUpdate}  = useFetch(updateNote)
-
-  const handleSave = async() => {
-   await fnupdateNote(note.id, editedNote);
-   setIsEditing(false);
-
+  const handleSave = async () => {
+    await editNote(note.id, editedNote);
+    setIsEditing(false);
   };
 
-  const handleDelete = () => {
-    onDelete(note.id);
+  const handleDelete = async () => {
+    await removeNote(note.id);
+  };
+
+  const handlePinNotes = async () => {
+    const newPinState = !note.isPinned;
+    await pinNote(note.id, newPinState);
   };
 
   return (
-    <Dialog>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(isOpen) => {
+        setIsDialogOpen(isOpen);
+        if (!isOpen) setIsEditing(false);
+      }}
+    >
       <DialogTrigger asChild>
-        <Card
-          className={`rounded-lg shadow-lg p-4 border border-[#BCC3C8] hover:bg-opacity-90 transition relative cursor-pointer`}
-          style={{ backgroundColor: bgColor }}
-        >
+        <Card className="group rounded-lg shadow-lg p-4 border border-[#BCC3C8] hover:bg-opacity-90 transition relative cursor-pointer"  style={{ backgroundColor: bgColor }}>
           <CardHeader>
-            <CardTitle className="text-[#2E3E4E] hover:text-[#1C2834] text-3xl font-semibold">
-              {note.title || "Untitled"}
-            </CardTitle>
-            <p className="text-[#2E3E4E] hover:text-[#1C2834] text-sm">
-              {note.tagline || "No tagline provided"}
-            </p>
+            <div className="flex justify-between">
+              <CardTitle>{note.title || "Untitled"}</CardTitle>
+              {note.isPinned ?  (
+                 <PinOff onClick={(e) => {
+                  e.stopPropagation();
+                  handlePinNotes();
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer" /> 
+                )
+              : (<Pin
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePinNotes();
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+              />)}
+            </div>
           </CardHeader>
-          <CardContent className="mt-2">
-            <p className="text-[#d1d5db]">{note.content || "No content available"}</p>
-          </CardContent>
-          <CardFooter className="mt-4 text-sm text-[#6c757d]">
-            {note.createdAt || "N/A"}
-          </CardFooter>
+          <CardContent>{note.content || "No content available"}</CardContent>
+          <CardFooter>{note.createdAt || "N/A"}</CardFooter>
         </Card>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent style={{ backgroundColor: bgColor }}>
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Edit Note" : "View Note"}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Note" : ""}</DialogTitle>
         </DialogHeader>
-        
         {isEditing ? (
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Input
-                id="title"
-                value={editedNote.title}
-                onChange={(e) => setEditedNote({...editedNote, title: e.target.value})}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Input
-                id="tagline"
-                value={editedNote.tagline}
-                onChange={(e) => setEditedNote({...editedNote, tagline: e.target.value})}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Textarea
-                id="content"
-                value={editedNote.content}
-                onChange={(e) => setEditedNote({...editedNote, content: e.target.value})}
-                className="col-span-3 min-h-[200px]"
-              />
-            </div>
-          </div>
+          <>
+            <Input
+              value={editedNote.title}
+              onChange={(e) =>
+                setEditedNote({ ...editedNote, title: e.target.value })
+              }
+            />
+            <Input
+              placeholder="Tagline" 
+              value={editedNote.tagline || ""}
+              onChange={(e) =>
+                setEditedNote({ ...editedNote, tagline: e.target.value })
+              }
+            />
+            <Textarea
+              value={editedNote.content}
+              onChange={(e) =>
+                setEditedNote({ ...editedNote, content: e.target.value })
+              }
+           />
+            <Button onClick={handleSave}>Save</Button>
+          </>
         ) : (
-          <div className="grid gap-4 py-4">
-            <h2 className="text-2xl font-bold">{note.title}</h2>
-            <p className="text-sm text-gray-500">{note.tagline}</p>
-            <p className="mt-4">{note.content}</p>
-            <p className="text-sm text-gray-400 mt-2">
-              Created at: {note.createdAt}
+          <div>
+            <h2 className="text-3xl font-bold">{note.title || "Untitled"}</h2>
+            <p className="text-">
+              {note.tagline || "No tagline available"}
             </p>
+            <p className="pt-3">{note.content || "No content available"}</p>
           </div>
         )}
-        
-        <div className="flex justify-between">
-          {isEditing ? (
-            <Button onClick={handleSave}>Save Changes</Button>
-          ) : (
-            <Button onClick={() => setIsEditing(true)}>Edit</Button>
-          )}
+        <div className="flex justify-end gap-2 mt-4">
+          {!isEditing && <Button onClick={() => setIsEditing(true)}>Edit</Button>}
           <Button variant="destructive" onClick={handleDelete}>
-            Delete Note
+            Delete
           </Button>
         </div>
       </DialogContent>
