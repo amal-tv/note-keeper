@@ -8,19 +8,17 @@ export const useNotes = () => useContext(NotesContext);
 export const NotesProvider = ({ children }) => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const notesPerPage = 6;
 
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);
-      setError(null);
       try {
         const fetchedNotes = await getNotes();
         setNotes(fetchedNotes);
       } catch (err) {
-        setError("Failed to fetch notes. Please try again later.");
+        // Handle any global errors here, but it's better to use toast in the component itself
       } finally {
         setLoading(false);
       }
@@ -30,13 +28,13 @@ export const NotesProvider = ({ children }) => {
 
   const addNote = async (noteData) => {
     setLoading(true);
-    setError(null);
     try {
       await addNewNote(noteData);
       const updatedNotes = await getNotes();
       setNotes(updatedNotes);
     } catch (err) {
-      setError("Failed to add note. Please try again.");
+      
+      throw new Error("Failed to add note.");
     } finally {
       setLoading(false);
     }
@@ -44,13 +42,12 @@ export const NotesProvider = ({ children }) => {
 
   const editNote = async (noteId, updatedData) => {
     setLoading(true);
-    setError(null);
     try {
       await updateNote(noteId, updatedData);
       const updatedNotes = await getNotes();
       setNotes(updatedNotes);
     } catch (err) {
-      setError("Failed to edit note. Please try again.");
+      throw new Error("Failed to edit note.");
     } finally {
       setLoading(false);
     }
@@ -58,13 +55,12 @@ export const NotesProvider = ({ children }) => {
 
   const removeNote = async (noteId) => {
     setLoading(true);
-    setError(null);
     try {
       await deleteNote(noteId);
       const updatedNotes = await getNotes();
       setNotes(updatedNotes);
     } catch (err) {
-      setError("Failed to delete note. Please try again.");
+      throw new Error("Failed to delete note.");
     } finally {
       setLoading(false);
     }
@@ -72,27 +68,24 @@ export const NotesProvider = ({ children }) => {
 
   const pinNote = async (noteId, isPinned) => {
     setLoading(true);
-    setError(null);
     try {
       await updateNote(noteId, { isPinned });
       const updatedNotes = await getNotes();
       setNotes(updatedNotes);
     } catch (err) {
-      setError("Failed to pin/unpin note. Please try again.");
+      throw new Error("Failed to pin/unpin note.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Pagination
+  
   const getPaginatedNotes = () => {
     const pinnedNotes = notes.filter((note) => note.isPinned);
     const nonPinnedNotes = notes.filter((note) => !note.isPinned);
-
     const combinedNotes = [...pinnedNotes, ...nonPinnedNotes];
     const startIndex = (currentPage - 1) * notesPerPage;
     const endIndex = startIndex + notesPerPage;
-
     return combinedNotes.slice(startIndex, endIndex);
   };
 
@@ -107,7 +100,6 @@ export const NotesProvider = ({ children }) => {
         removeNote,
         pinNote,
         loading,
-        error,
         currentPage,
         totalPages,
         setCurrentPage,

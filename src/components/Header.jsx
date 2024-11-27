@@ -12,8 +12,11 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
+import { Search } from "lucide-react";
+import toast from "react-hot-toast";
+import { motion } from "motion/react"
 
-export const Header = () => {
+export const Header = ({ setSearchQuery }) => {
   const { addNote } = useNotes();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,6 +24,7 @@ export const Header = () => {
     tagline: "",
     content: "",
   });
+  const [searchQuery, setLocalSearchQuery] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,26 +36,46 @@ export const Header = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addNote(formData);
-    setFormData({ title: "", tagline: "", content: "" });
-    setOpen(false);
+    try {
+      await addNote(formData);
+      setFormData({ title: "", tagline: "", content: "" });
+      setOpen(false);
+      toast.success("Note created successfully!");
+    } catch (err) {
+      toast.error("Failed to create note. Please try again.");
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setLocalSearchQuery(query);
+    setSearchQuery(query);
   };
 
   return (
-    <div className="flex items-center pl-20 pr-20 pt-[50px]">
+    <div className="flex items-center pl-20 sm:pr-20 pt-[50px] mr-[150px]">
       <div>
         <div className="text-[#DCF2F1] font-sans text-6xl">NoteSpace</div>
         <div className="mt-4 flex justify-between gap-7">
-          <Input
-            type="text"
-            placeholder="Search note"
-            className="bg-[#534c82] text-white px-4 py-2 rounded-md shadow-sm w-[400px] focus-visible:ring-transparent"
-          />
+          <div className="flex items-center bg-[#534c82] text-white px-4 rounded-md w-[200px] sm:w-[400px]">
+            <Search className="text-white mr-2" size={18} />
+            <Input
+              type="text"
+              placeholder="Search note"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="bg-[#534c82] border-none focus:outline-none placeholder-opacity-100  rounded-md"
+            />
+          </div>
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-[#71C0D4] to-[#5AA7BD] text-white hover:from-[#5AA7BD] hover:to-[#3C7896] rounded-lg px-6 py-2 font-semibold shadow-md">
+          <DialogTrigger asChild>
+          <motion.button
+                whileTap={{ scale: 0.85 }}
+                whileHover={{scale : 0.9}}
+                className="bg-red-500 rounded-full text-white px-6 py-2 font-semibold shadow-md text-2xl"
+              >
                 +
-              </Button>
+              </motion.button>
             </DialogTrigger>
             <DialogContent className="bg-[#262f41] text-white">
               <DialogHeader>
@@ -88,13 +112,14 @@ export const Header = () => {
                 />
               </form>
               <DialogFooter>
-                <Button
+                <motion.Button
                   type="submit"
                   onClick={handleSubmit}
-                  className="bg-[#39c1f0]"
+                  className="bg-red-500 text-white p-2 rounded-sm"
+                 
                 >
                   Save Note
-                </Button>
+                </motion.Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
