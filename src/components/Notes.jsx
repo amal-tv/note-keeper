@@ -15,7 +15,7 @@ export const Notes = ({ searchQuery = "" }) => {
   );
 
   if (!filteredNotes.length) {
-    return <div className="text-center mx-auto p-20 text-white">No notes available</div>;
+    return <div className="text-center mx-auto p-20 text-white text-4xl">No notes available</div>;
   }
 
   return (
