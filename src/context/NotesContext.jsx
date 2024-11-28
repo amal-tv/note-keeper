@@ -18,7 +18,7 @@ export const NotesProvider = ({ children }) => {
         const fetchedNotes = await getNotes();
         setNotes(fetchedNotes);
       } catch (err) {
-        // Handle any global errors here, but it's better to use toast in the component itself
+       
       } finally {
         setLoading(false);
       }

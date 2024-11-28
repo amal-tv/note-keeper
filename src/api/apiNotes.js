@@ -37,7 +37,7 @@ export async function updateNote(noteId, updatedData) {
     updatedData.createdAt = Timestamp.fromDate(new Date(updatedData.createdAt));
   }
 
-  console.log(`Reaching: ${noteId} and ${JSON.stringify(updatedData)}`);
+ 
 
   await updateDoc(noteRef, {
     ...updatedData,
