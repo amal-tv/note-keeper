@@ -14,7 +14,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { Search } from "lucide-react";
 import toast from "react-hot-toast";
-import { motion } from "motion/react"
+import { motion } from "motion/react";
 
 export const Header = ({ setSearchQuery }) => {
   const { addNote } = useNotes();
@@ -55,7 +55,10 @@ export const Header = ({ setSearchQuery }) => {
   return (
     <div className="flex items-center pl-20 sm:pr-20 pt-[50px] mr-[150px]">
       <div>
-        <div className="text-[#DCF2F1] font-sans text-6xl">NoteSpace</div>
+        <motion.div initial={{y : -30, opacity : 0}}
+        animate ={{ y: 0, opacity : 1}}
+        transition={{duration : 1,ease : "easeInOut" }}
+         className="text-[#DCF2F1] font-sans text-6xl">NoteSpace</motion.div>
         <div className="mt-4 flex justify-between gap-7">
           <div className="flex items-center bg-[#534c82] text-white px-4 rounded-md w-[200px] sm:w-[400px]">
             <Search className="text-white mr-2" size={18} />

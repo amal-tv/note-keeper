@@ -64,7 +64,7 @@ export const NoteCard = ({ note, bgColor }) => {
       }}
     >
       <DialogTrigger asChild>
-        <Card className="group rounded-lg shadow-lg p-4 border border-[#BCC3C8] hover:bg-opacity-90 transition relative cursor-pointer" style={{ backgroundColor: bgColor }}>
+        <Card className="group rounded-lg shadow-lg p-4 border border-[#BCC3C8] hover:bg-opacity-90 hover:scale-105  transition relative cursor-pointer" style={{ backgroundColor: bgColor }}>
           <CardHeader>
             <div className="flex justify-between">
              <div>
@@ -98,7 +98,9 @@ export const NoteCard = ({ note, bgColor }) => {
               )}
             </div>
           </CardHeader>
-          <CardContent>{note.content || "No content available"}</CardContent>
+          <CardContent>{note.content
+    ? `${note.content.slice(0, 100)}${note.content.length > 10 ? "..." : ""}`
+    : "No content available"}</CardContent>
           <CardFooter>
             <div className="text-xs">
             {formattedDate}
